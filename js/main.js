@@ -82,6 +82,7 @@ const darLaBienvenida = usuario => {
 			default:
 				return
 		}
+		console.log(bienvenida)
 		alert(bienvenida)
 
 		return bienvenida
@@ -191,26 +192,30 @@ const calcularYAcumularSubtotal = function (infoDeProducto, cantidad) {
 function generarProductoAAgregar(infoDeProducto, cantidad, subtotal) {
 	if (subtotal) {
 		class Producto {
-			constructor(name, price, quantity, partialTotal) {
+			constructor(idNum, name, price, quantity, partialTotal) {
+				this.id = idNum
 				this.nombre = name
 				this.precio = price
 				this.cantidad = quantity
 				this.subtotal = partialTotal
 			}
 
-			agregarACarrito(arrIdsEnCarrito, carrito, infoDeProducto) {
+			agregarACarrito(arrIdsEnCarrito, carrito = [], infoDeProducto) {
 				if (!arrIdsEnCarrito.includes(infoDeProducto.id)) {
 					arrIdsEnCarrito.push(infoDeProducto.id)
 					carrito.push(this)
 				} else {
 					const INDICE_DE_PRODUCTO = infoDeProducto.id - 1
 					carrito[INDICE_DE_PRODUCTO].cantidad += this.cantidad
+					carrito[INDICE_DE_PRODUCTO].subtotal += this.subtotal
 				}
+				// Hacer ".sort()" del carrito en base al "id" de cada producto agregado, para que las cantidades agregadas se vayan sumando al producto correspondiente, y que no dependa de en qué orden voy comprando los productos:
+				carrito.sort((a, b) => a.id - b.id)
 				const PRODUCTO_AGREGADO = true
 				return PRODUCTO_AGREGADO
 			}
 		}
-		const PRODUCTO_A_AGREGAR = new Producto(infoDeProducto.nombre, infoDeProducto.precio, cantidad, subtotal)
+		const PRODUCTO_A_AGREGAR = new Producto(infoDeProducto.id, infoDeProducto.nombre, infoDeProducto.precio, cantidad, subtotal)
 		infoDeProducto.stock -= cantidad
 		return PRODUCTO_A_AGREGAR
 	}
@@ -218,7 +223,7 @@ function generarProductoAAgregar(infoDeProducto, cantidad, subtotal) {
 
 /* 3° PARTE - "CONCLUSIÓN": */
 function generarMensajeDeCarrito(mensajeDeCarrito) {
-	mensajeDeCarrito = "CARRITO:"
+	mensajeDeCarrito = "CARRITO (total a pagar: $" + total + "):"
 	for (const PRODUCTO of carrito) {
 		mensajeDeCarrito += "\n" + PRODUCTO.nombre
 			+ ", precio: $" + PRODUCTO.precio
@@ -232,6 +237,7 @@ function mostrarTotalYODespedirse(carrito, mensajeDeCarrito) {
 	// Si carrito tiene productos...
 	if (carrito.length > 0) {
 		// ...entonces mostrar total a pagar y despedirse del usuario:
+		console.log(carrito)
 		despedida = mensajeDeCarrito + "\n\nEl total a pagar es de: $" + total
 			+ "\n\n¡Gracias por preferirnos!"
 
@@ -266,19 +272,19 @@ if (USUARIO) {
 			id: 1,
 			nombre: "Agua de jamaica",
 			precio: 400,
-			stock: 12,
+			stock: 10,
 		},
 		{
 			id: 2,
 			nombre: "Agua de limón",
 			precio: 500,
-			stock: 10,
+			stock: 20,
 		},
 		{
 			id: 3,
 			nombre: "Agua de tamarindo",
 			precio: 600,
-			stock: 8,
+			stock: 30,
 		}
 	]
 	let confirmacion = confirm("¿Desea agregar algún producto a su carrito de compras?")
